@@ -1,0 +1,3 @@
+Download mongoDB and mongosh from here:
+
+https://www.mongodb.com/docs/manual/tutorial/install-mongodb-on-windows/
