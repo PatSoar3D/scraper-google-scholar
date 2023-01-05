@@ -6,13 +6,6 @@ import regex as re
 from pdfController import pdf_controller
 from dbClient import db_client
 
-options = webdriver.ChromeOptions()
-options.add_argument('--headless')
-
-# Set the path to the chromedriver executable
-driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options )
-driver.get('https://scholar.google.com/')
-
 # creating method to help scrape
 def scrape_site(pdf_element):
     try:
@@ -29,7 +22,6 @@ def scrape_site(pdf_element):
                 if(pdf.save_pdf(pdf_url)):
                     print('[PDF Downloaded]')
                     pdf_abstract = pdf.extract_abstract_from_pdf()
-                    print('[Abstract]:', pdf_abstract)
                     
                     # nullify abstract if no abstract is found
                     if(pdf_abstract == None):
@@ -40,16 +32,26 @@ def scrape_site(pdf_element):
                     if(resp_id != -1):
                         print('[RECORD SAVED ' + str(resp_id) + ']: ' + str(resp_article_collection) + ':> ' + str(resp_results_collection))
                     else:
-                        print("[STATUS]: One of the collections is not created.'")
+                        print("[STATUS]: One of the collections is not created.")
+                        raise Exception("[STATUS]: One of the collections is not created.")
                 else:
                     print("[STATUS]: Couldn't save the PDF attachment to local server")
+                    raise Exception("[STATUS]: Couldn't save the PDF attachment to local server")
             else:
                 print("[STATUS]: Couldn't download PDF attachment because the URL is sending content type other than PDF.")
+                raise Exception("[STATUS]: Couldn't download PDF attachment because the URL is sending content type other than PDF.")
         except:
-            print("[STATUS]: Couldn't download PDF attachment.")
+            pass
     except:
-        print('[STATUS]: No attachment for this article')
-        
+        print('[STATUS]: No href for the A tag element')
+
+   
+options = webdriver.ChromeOptions()
+options.add_argument('--headless')
+
+# Set the path to the chromedriver executable
+driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options )
+driver.get('https://scholar.google.com/')
 
 # # Enter the search query and submit the form
 search_box = driver.find_element('name', 'q')
@@ -85,13 +87,13 @@ for result in results[1:]:
             scrape_site(pdf_element)
         else:
             print('[STATUS]: Attachment is not of type PDF')
+            raise Exception("Could'nt download PDF attachment")
     except:
         try:
             file_element = result.find_element('css selector', '.gs_rt a')
             scrape_site(file_element)
         except:
             print('[STATUS]: Could not find a scrapeable link')
-    
     print()
         
 driver.close()
