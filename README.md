@@ -15,14 +15,14 @@ This project is built with the following technologies:
 
 Follow these steps to set up and run the scraper:
 
-1. Create a virtual environment and install the dependencies using `pip`:
-
-`pip install -r requirements.txt`
-
-
-2. Install and set up MongoDB. Follow the instructions in the `instructions.txt` file to do this.
-
-3. Verify that your MongoDB connection string is `mongodb://localhost:27017`.
+1. Create a virtual environment with `python -m venv venv` 
+2. Install the dependencies using `pip install -r requirements.txt`
+3. Install and set up MongoDB. Follow the instructions in following link: https://www.mongodb.com/docs/manual/tutorial/install-mongodb-on-windows/
+4. Verify that your MongoDB connection string is `mongodb://localhost:27017`. You can check this by going into MongoDBCompass.
+5. Things you can change in project: 
+    1. Query for GOOGLE Scholar at `line 58`
+    2. MongoDB database name to create by code at `line 69`
+    3. MongoDB collection names to be generated at `line 70`
 
 ## Database Structure
 
