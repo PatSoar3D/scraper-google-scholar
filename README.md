@@ -2,6 +2,16 @@
 
 A web scraper that extracts article titles, PDF files, and abstracts from Google Scholar based on a user-specified search query. The scraper also stores this information in a MongoDB database, which is generated during the execution of the scraper.
 
+## Technologies
+
+This project is built with the following technologies:
+
+- ![Python](https://img.shields.io/badge/-Python-black?style=flat&logo=python)
+- ![Selenium](https://img.shields.io/badge/-Selenium-brightgreen?style=flat&logo=selenium)
+- ![MongoDB](https://img.shields.io/badge/-MongoDB-blue?style=flat&logo=mongodb)
+- ![PdfMiner](https://img.shields.io/badge/-PdfMiner-orange?style=flat&logo=pdfminer)
+
+
 ## Database Structure
 
 The scraper stores data in the following collections:
