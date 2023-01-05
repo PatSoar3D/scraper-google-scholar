@@ -8,56 +8,40 @@ class db_client():
         # scraperGoogleScholar
         self.client = pymongo.MongoClient(client_url)
         self.db = self.client[new_db_name]
-        self.dbCollectionA = None
-        self.dbCollectionB = None
+        self.dbCollections = {}
         self.record_id = 0
         pass
 
-    def create_collection_A(self, collection_name, schema_fields):
-        properties = {}
-        for field in list(schema_fields.keys()):
-            properties[field] = {
-                "bsonType": schema_fields[field],
-                "description": "must be a " + schema_fields[field] + " and is required"
-            }
-        
-        self.dbCollectionA = self.db.create_collection(collection_name, 
-            validator = {
-                "$jsonSchema": {
-                    "bsonType": "object",
-                    "required": list(schema_fields.keys()),
-                    "properties": properties
-                }
-            }
-        )
-        return self.dbCollectionA 
+    def create_collections(self, collections, schemas):
+        for collection_name in collections:
+            schema = schemas[collections.index(collection_name)]
+            
+            if collection_name not in self.db.list_collection_names():
+                properties = {}
+                for field in list(schema.keys()):
+                    properties[field] = {
+                        "bsonType": schema[field],
+                        "description": "must be a " + schema[field] + " and is required"
+                    }
+                
+                self.dbCollections[collection_name] = self.db.create_collection(collection_name, 
+                    validator = {
+                        "$jsonSchema": {
+                            "bsonType": "object",
+                            "required": list(schema.keys()),
+                            "properties": properties
+                        }
+                    }
+                )
+                
+        return self.dbCollections
     
-    def create_collection_B(self, collection_name, schema_fields):
-        properties = {}
-        for field in list(schema_fields.keys()):
-            properties[field] = {
-                "bsonType": schema_fields[field],
-                "description": "must be a " + schema_fields[field] + " and is required"
-            }
-        
-        self.dbCollectionB = self.db.create_collection(collection_name, 
-            validator = {
-                "$jsonSchema": {
-                    "bsonType": "object",
-                    "required": list(schema_fields.keys()),
-                    "properties": properties
-                }
-            }
-        )
-        return self.dbCollectionB 
-        
-
     def add_data(self, pdf_name, article_name, version, abstract):
-        if(self.dbCollectionA == None or self.dbCollectionB == None):
-            return '[STATUS]: One of the collections is not selected.'
+        if(self.dbCollections['articles'] == None or self.dbCollections['results'] == None):
+            return -1, -1, -1
         else:
-            article_collection = self.dbCollectionA
-            results_collection = self.dbCollectionB
+            article_collection = self.dbCollections['articles']
+            results_collection = self.dbCollections['results']
             
             result_article = article_collection.insert_one({
                 "id": self.record_id,

@@ -27,8 +27,7 @@ results = driver.find_elements('css selector', '.gs_scl')
 # initialize mongoDB server with already created database
 # and then it creates two collections within the database to store articles
 dbc = db_client('mongodb://localhost:27017/', 'scraperGoogleScholar')
-dbc.create_collection_A('articles', {'id': 'int', 'name': 'string'})
-dbc.create_collection_B('results', {'article_id': 'int', 'name': 'string', 'version': 'int', 'abstract': 'string'})
+dbc.create_collections(['articles', 'results'], [{'id': 'int', 'name': 'string'},{'article_id': 'int', 'name': 'string', 'version': 'int', 'abstract': 'string'}])
 dbc_record_counter = 0
 
 # Iterate through the search results
@@ -66,7 +65,10 @@ for result in results[1:]:
                             
                         # id, pdf_name, article_name, version, abstract
                         resp_id, resp_article_collection, resp_results_collection = dbc.add_data(pdf_filename, title, 1, pdf_abstract)
-                        print('[RECORD SAVED ' + resp_id + ']: '+resp_article_collection+':> '+resp_results_collection)
+                        if(resp_id != -1):
+                            print('[RECORD SAVED ' + resp_id + ']: '+resp_article_collection+':> '+resp_results_collection)
+                        else:
+                            print("[STATUS]: One of the collections is not created.'")
                     else:
                         print("[STATUS]: Couldn't save the PDF attachment to local server")
                 else:

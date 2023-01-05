@@ -56,13 +56,11 @@ class pdf_controller():
                 return ' '.join(self.pdf_text[index_of_first_abstract : index_of_first_abstract+text_after_word_abstract_before_newline].splitlines())
 
     def save_pdf(self, pdf_url):
-        chunk_size = 2000
         r = requests.get(pdf_url, stream=True)
-        try:
-            with open(self.pdf, 'wb') as f:
-                for chunk in r.iter_content(chunk_size):
-                    f.write(chunk)
-            f.close()
-            return True
-        except:
-            return False    
+        with open(self.pdf) as f:
+            f.write(r.content)
+        return True
+
+p = pdf_controller('Practical machine learning tools and techniques.pdf')
+if(p.save_pdf('https://doc1.bibliothek.li/acb/FLMF040119.pdf')):
+    print(p.extract_abstract_from_pdf())
