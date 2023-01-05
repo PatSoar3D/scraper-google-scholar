@@ -3,6 +3,8 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 import regex as re
+from pdfController import pdf_controller
+from dbClient import db_client
 
 options = webdriver.ChromeOptions()
 options.add_argument('--headless')
@@ -22,10 +24,16 @@ driver.implicitly_wait(10)
 # Find the search results elements
 results = driver.find_elements('css selector', '.gs_scl')
 
+# initialize mongoDB server with already created database
+# and then it creates two collections within the database to store articles
+dbc = db_client('mongodb://localhost:27017/', 'scraperGoogleScholar')
+dbc.create_collection_A('articles', {'id': 'int', 'name': 'string'})
+dbc.create_collection_B('results', {'article_id': 'int', 'name': 'string', 'version': 'int', 'abstract': 'string'})
+dbc_record_counter = 0
+
 # Iterate through the search results
 for result in results[1:]:
     # Find the title element and extract the text
-    
     title_element = result.find_element('css selector', '.gs_rt a')
     title = title_element.text
     print('[Title]:', title)
@@ -45,9 +53,22 @@ for result in results[1:]:
             try:
                 r = requests.get(pdf_url, stream=True)
                 if(r.headers['Content-Type'] == 'application/pdf'):
-                    with open(re.sub(r'[^\w\s]' , '-', title) + '.pdf', 'wb') as f:
-                        f.write(r.content)
+                    pdf_filename = re.sub(r'[^\w\s]' , '-', title) + '.pdf'
+                    pdf = pdf_controller(pdf_filename)
+                    if(pdf.save_pdf(pdf_url)):
                         print('[Downloaded]')
+                        pdf_abstract = pdf.extract_abstract_from_pdf()
+                        print('[Abstract]:', pdf_abstract)
+                        
+                        # nullify abstract if no abstract is found
+                        if(pdf_abstract == None):
+                            pdf_abstract = ''
+                            
+                        # id, pdf_name, article_name, version, abstract
+                        resp_id, resp_article_collection, resp_results_collection = dbc.add_data(pdf_filename, title, 1, pdf_abstract)
+                        print('[RECORD SAVED ' + resp_id + ']: '+resp_article_collection+':> '+resp_results_collection)
+                    else:
+                        print("[STATUS]: Couldn't save the PDF attachment to local server")
                 else:
                     print("[STATUS]: Couldn't download PDF attachment because the URL is sending content type other than PDF.")
                     
