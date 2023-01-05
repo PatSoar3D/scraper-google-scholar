@@ -66,7 +66,7 @@ for result in results[1:]:
                         # id, pdf_name, article_name, version, abstract
                         resp_id, resp_article_collection, resp_results_collection = dbc.add_data(pdf_filename, title, 1, pdf_abstract)
                         if(resp_id != -1):
-                            print('[RECORD SAVED ' + resp_id + ']: '+resp_article_collection+':> '+resp_results_collection)
+                            print('[RECORD SAVED ' + str(resp_id) + ']: ' + str(resp_article_collection) + ':> ' + str(resp_results_collection))
                         else:
                             print("[STATUS]: One of the collections is not created.'")
                     else:

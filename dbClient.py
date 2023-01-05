@@ -33,6 +33,8 @@ class db_client():
                         }
                     }
                 )
+            else:
+                self.dbCollections[collection_name] = self.db.get_collection(collection_name)
                 
         return self.dbCollections
     
