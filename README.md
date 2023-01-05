@@ -11,6 +11,18 @@ This project is built with the following technologies:
 - ![MongoDB](https://img.shields.io/badge/-MongoDB-blue?style=flat&logo=mongodb)
 - ![PdfMiner](https://img.shields.io/badge/-PdfMiner-orange?style=flat&logo=pdfminer)
 
+## Getting Started
+
+Follow these steps to set up and run the scraper:
+
+1. Create a virtual environment and install the dependencies using `pip`:
+
+pip install -r requirements.txt
+
+
+2. Install and set up MongoDB. Follow the instructions in the `instructions.txt` file to do this.
+
+3. Verify that your MongoDB connection string is `mongodb://localhost:27017`.
 
 ## Database Structure
 
