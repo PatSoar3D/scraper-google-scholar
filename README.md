@@ -17,7 +17,7 @@ Follow these steps to set up and run the scraper:
 
 1. Create a virtual environment and install the dependencies using `pip`:
 
-pip install -r requirements.txt
+`pip install -r requirements.txt`
 
 
 2. Install and set up MongoDB. Follow the instructions in the `instructions.txt` file to do this.
@@ -45,11 +45,3 @@ The following dependencies are required to run the scraper:
 - `regex`: A library for working with regular expressions
 - `pdfminer`: A library for extracting data from PDF files
 - `pymongo`: A library for working with MongoDB databases
-
-## Installation
-
-To install the dependencies, run the following command:
-
-pip install -r requirements.txt
-
-This will install all the required libraries.
