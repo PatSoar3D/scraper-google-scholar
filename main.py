@@ -1,10 +1,12 @@
 import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 import regex as re
 from pdfController import pdf_controller
 from dbClient import db_client
+import os
 
 # creating method to help scrape
 def scrape_site(pdf_element):
@@ -13,11 +15,10 @@ def scrape_site(pdf_element):
         print('[URL]: ', pdf_url)
 
         # downloading PDF file
-        chunk_size = 2000
         try:
             r = requests.get(pdf_url, stream=True)
             if(r.headers['Content-Type'] == 'application/pdf'):
-                pdf_filename = re.sub(r'[^\w\s]' , '-', title) + '.pdf'
+                pdf_filename = os.path.join('Results',re.sub(r'[^\w\s]' , '-', title) + '.pdf')
                 pdf = pdf_controller(pdf_filename)
                 if(pdf.save_pdf(pdf_url)):
                     print('[PDF Downloaded]')
@@ -25,7 +26,10 @@ def scrape_site(pdf_element):
                     
                     # nullify abstract if no abstract is found
                     if(pdf_abstract == None):
+                        print('[ABSTRACT]: Not Found in Article')
                         pdf_abstract = ''
+                    else:
+                        print('[ABSTRACT]: Found in Article')
                         
                     # id, pdf_name, article_name, version, abstract
                     resp_id, resp_article_collection, resp_results_collection = dbc.add_data(pdf_filename, title, 1, pdf_abstract)
@@ -38,25 +42,35 @@ def scrape_site(pdf_element):
                     print("[STATUS]: Couldn't save the PDF attachment to local server")
                     raise Exception("[STATUS]: Couldn't save the PDF attachment to local server")
             else:
-                print("[STATUS]: Couldn't download PDF attachment because the URL is sending content type other than PDF.")
-                raise Exception("[STATUS]: Couldn't download PDF attachment because the URL is sending content type other than PDF.")
+                print("[STATUS]: Couldn't download PDF attachment because the URL is sending content type other than PDF which is",r.headers['Content-Type'])
+                raise Exception("[STATUS]: Couldn't download PDF attachment because the URL is sending content type other than PDF which is",r.headers['Content-Type'])
         except:
             pass
     except:
         print('[STATUS]: No href for the A tag element')
-
    
 options = webdriver.ChromeOptions()
-options.add_argument('--headless')
+options.headless = True
 
 # Set the path to the chromedriver executable
-driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options )
-driver.get('https://scholar.google.com/')
+chrome_options = Options()
+chrome_options.add_argument("--lang=en-US")
+
+driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), chrome_options=chrome_options, options=options)
+driver.get('https://scholar.google.com/?hl=en&as_sdt=0,5')
 
 # # Enter the search query and submit the form
 search_box = driver.find_element('name', 'q')
-search_box.send_keys('data')
+search_box.send_keys('NeRF')
 search_box.submit()
+
+# Wait for the search results to load
+driver.implicitly_wait(10)
+
+# Click on the respective filter
+a_links = driver.find_elements('css selector', '.gs_ind a')
+filter_link = [i for i in a_links if i.text == 'Sort by date'][0]
+filter_link.click()
 
 # Wait for the search results to load
 driver.implicitly_wait(10)
