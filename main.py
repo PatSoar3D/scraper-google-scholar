@@ -63,9 +63,6 @@ def connect(url, query, databaseName):
     search_box.send_keys(query)
     search_box.submit()
 
-
-
-
     # Wait for the search results to load
     driver.implicitly_wait(10)
 
