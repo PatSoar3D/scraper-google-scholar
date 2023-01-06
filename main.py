@@ -50,64 +50,74 @@ def scrape_site(pdf_element):
         print('[STATUS]: No href for the A tag element')
    
 # Set the path to the chromedriver executable
-options = webdriver.ChromeOptions()
-options.add_argument("--headless")
-options.add_argument("--lang=en-US")
-driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
-driver.get('https://scholar.google.com/?hl=en')
-driver.set_window_rect(width=1200, height=900)
+def connect(url, query, databaseName):
+    options = webdriver.ChromeOptions()
+    options.add_argument("--headless")
+    options.add_argument("--lang=en-US")
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    driver.get(url)
+    driver.set_window_rect(width=1200, height=900)
 
-# # Enter the search query and submit the form
-search_box = driver.find_element('name', 'q')
-search_box.send_keys('NeRF')
-search_box.submit()
+    # # Enter the search query and submit the form
+    search_box = driver.find_element('name', 'q')
+    search_box.send_keys(query)
+    search_box.submit()
 
-# Wait for the search results to load
-driver.implicitly_wait(10)
+    # Wait for the search results to load
+    driver.implicitly_wait(10)
 
-# Click on the respective filter
-a_links = driver.find_elements('css selector', '.gs_ind a')
-for a in a_links:
-    print(a.text)
-filter_link = [i for i in a_links if i.text == 'Sort by date'][0]
-filter_link.click()
-
-# Wait for the search results to load
-driver.implicitly_wait(10)
-
-# Find the search results elements
-results = driver.find_elements('css selector', '.gs_scl')
-
-# initialize mongoDB server with already created database
-# and then it creates two collections within the database to store articles
-dbc = db_client('mongodb://localhost:27017/', 'scraperGoogleScholar')
-dbc.create_collections(['articles', 'results'], [{'id': 'int', 'name': 'string'},{'article_id': 'int', 'name': 'string', 'version': 'int', 'abstract': 'string'}])
-dbc_record_counter = 0
-
-# Iterate through the search results
-for result in results[1:]:
-    # Find the title element and extract the text
-    title_element = result.find_element('css selector', '.gs_rt a')
-    title = title_element.text
-    print('[Title]:', title)
-
-    # Find the PDF download link and extract the href
-    try:
-        file_element = result.find_element('css selector', '.gs_ctg2')
-        file_extension = file_element.text
-        
-        if(file_extension[1:-1] == 'PDF'):
-            pdf_element = result.find_element('css selector', '.gs_or_ggsm a')
-            scrape_site(pdf_element)
-        else:
-            print('[STATUS]: Attachment is not of type PDF')
-            raise Exception("Could'nt download PDF attachment")
-    except:
+    # Click on the respective filter
+    a_links = driver.find_elements('css selector', '.gs_ind a')
+    print('Select one of the filters: ')
+    for a in a_links:
+        print('\t' + str(a_links.index(a)) + ': ' + a.text)
+    
+    while(True):
         try:
-            file_element = result.find_element('css selector', '.gs_rt a')
-            scrape_site(file_element)
+            filter_link = a_links[int(input('Write the index of filter you want: '))]
+            break
         except:
-            print('[STATUS]: Could not find a scrapeable link')
-    print()
+            print('Try again!')            
         
-driver.close()
+    
+    filter_link.click()
+
+    # Wait for the search results to load
+    driver.implicitly_wait(10)
+
+    # Find the search results elements
+    results = driver.find_elements('css selector', '.gs_scl')
+
+    # initialize mongoDB server with already created database
+    # and then it creates two collections within the database to store articles
+    dbc = db_client('mongodb://localhost:27017/', databaseName)
+    dbc.create_collections(['articles', 'results'], [{'id': 'int', 'name': 'string'},{'article_id': 'int', 'name': 'string', 'version': 'int', 'abstract': 'string'}])
+    dbc_record_counter = 0
+
+    # Iterate through the search results
+    for result in results[1:]:
+        # Find the title element and extract the text
+        title_element = result.find_element('css selector', '.gs_rt a')
+        title = title_element.text
+        print('[Title]:', title)
+
+        # Find the PDF download link and extract the href
+        try:
+            file_element = result.find_element('css selector', '.gs_ctg2')
+            file_extension = file_element.text
+            
+            if(file_extension[1:-1] == 'PDF'):
+                pdf_element = result.find_element('css selector', '.gs_or_ggsm a')
+                scrape_site(pdf_element)
+            else:
+                print('[STATUS]: Attachment is not of type PDF')
+                raise Exception("Could'nt download PDF attachment")
+        except:
+            try:
+                file_element = result.find_element('css selector', '.gs_rt a')
+                scrape_site(file_element)
+            except:
+                print('[STATUS]: Could not find a scrapeable link')
+        print()
+            
+    driver.close()
