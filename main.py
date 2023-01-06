@@ -49,15 +49,13 @@ def scrape_site(pdf_element):
     except:
         print('[STATUS]: No href for the A tag element')
    
-options = webdriver.ChromeOptions()
-options.headless = True
-
 # Set the path to the chromedriver executable
-chrome_options = Options()
-chrome_options.add_argument("--lang=en-US")
-
-driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), chrome_options=chrome_options, options=options)
-driver.get('https://scholar.google.com/?hl=en&as_sdt=0,5')
+options = webdriver.ChromeOptions()
+options.add_argument("--headless")
+options.add_argument("--lang=en-US")
+driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+driver.get('https://scholar.google.com/?hl=en')
+driver.set_window_rect(width=1200, height=900)
 
 # # Enter the search query and submit the form
 search_box = driver.find_element('name', 'q')
@@ -69,6 +67,8 @@ driver.implicitly_wait(10)
 
 # Click on the respective filter
 a_links = driver.find_elements('css selector', '.gs_ind a')
+for a in a_links:
+    print(a.text)
 filter_link = [i for i in a_links if i.text == 'Sort by date'][0]
 filter_link.click()
 
