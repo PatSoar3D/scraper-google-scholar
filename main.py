@@ -21,7 +21,7 @@ def scrape_site(pdf_element):
         # downloading PDF file
         try:
             r = requests.get(pdf_url, stream=True)
-            if(r.headers['Content-Type'] == 'application/pdf'):
+            try:
                 pdf_filename = os.path.join('Results',re.sub(r'[^\w\s]' , '-', title) + '.pdf')
                 pdf = pdf_controller(pdf_filename)
                 if(pdf.save_pdf(pdf_url)):
@@ -45,9 +45,8 @@ def scrape_site(pdf_element):
                 else:
                     print("[STATUS]: Couldn't save the PDF attachment to local server")
                     raise Exception("[STATUS]: Couldn't save the PDF attachment to local server")
-            else:
+            except:
                 print("[STATUS]: Couldn't download PDF attachment because the URL is sending content type other than PDF which is",r.headers['Content-Type'])
-                raise Exception("[STATUS]: Couldn't download PDF attachment because the URL is sending content type other than PDF which is",r.headers['Content-Type'])
         except:
             pass
     except:
