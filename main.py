@@ -8,8 +8,12 @@ from pdfController import pdf_controller
 from dbClient import db_client
 import os
 
+title = None
+dbc = None
+
 # creating method to help scrape
 def scrape_site(pdf_element):
+    global title, dbc
     try:
         pdf_url = pdf_element.get_attribute('href')
         print('[URL]: ', pdf_url)
@@ -51,12 +55,16 @@ def scrape_site(pdf_element):
    
 # Set the path to the chromedriver executable
 def connect(url, query, databaseName):
+    if(len(databaseName) < 1):
+        databaseName = 'scraperGoogleScholar'
+    
+    global title, dbc
     options = webdriver.ChromeOptions()
-    options.add_argument("--headless")
+    # options.add_argument("--headless")
     options.add_argument("--lang=en-US")
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
     driver.get(url)
-    driver.set_window_rect(width=1200, height=900)
+    # driver.set_window_rect(width=1200, height=900)
 
     # # Enter the search query and submit the form
     search_box = driver.find_element('name', 'q')
@@ -74,7 +82,11 @@ def connect(url, query, databaseName):
     
     while(True):
         try:
-            filter_link = a_links[int(input('Write the index of filter you want: '))]
+            filter_index = int(input('Write the index of filter you want: '))
+            if(filter_index == -1):
+                return
+            filter_link = a_links[filter_index]
+            
             break
         except:
             print('Try again!')            
